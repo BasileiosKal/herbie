@@ -5,6 +5,32 @@
 
 (provide program->c)
 
+;; To compute the cost of a program, we could use the tree as a
+;; whole, but this is inaccurate if the program has many common
+;; subexpressions.  So, we compile the program to a register machine
+;; and use that to estimate the cost.
+
+(define (compile expr)
+  (define assignments '())
+  (define compilations (make-hash))
+
+  ;; TODO : use one of Racket's memoization libraries
+  (define (compile-one expr)
+    (hash-ref!
+     compilations expr
+     (λ ()
+       (let ([expr* (if (list? expr)
+			(let ([fn (car expr)] [children (cdr expr)])
+			  (cons fn (map compile-one children)))
+			expr)]
+	     [register (gensym "r")])
+	 (set! assignments (cons (list register expr*) assignments))
+	 register))))
+
+  (let ([reg (compile-one expr)])
+    `(let* ,(reverse assignments) ,reg)))
+
+
 (define (unused-variables prog)
   (remove* (free-variables (program-body prog))
            (program-variables prog)))

@@ -12,7 +12,6 @@
          location? expr?
          location-do location-get
          eval-prog eval-const-expr eval-application
-         compile
          free-variables replace-expression
          desugar-program resugar-program)
 
@@ -79,15 +78,11 @@
   (let/ec return
     (location-do loc prog return)))
 
+(define eval-cache (make-hash))
+
+(register-reset (λ () (hash-clear! eval-cache)))
+
 (define (eval-prog prog mode repr)
-  ; Keep exact numbers exact
-  ;; TODO(interface): Right now, real->precision and precision->real are
-  ;; mixed up for bf and fl because there is a mismatch between the fpbench
-  ;; input format for how we specify complex numbers (which is the format
-  ;; the interface will ultimately use), and the 1.3 herbie input format
-  ;; (which has no way of specifying complex numbers as input.) Once types
-  ;; and representations are cleanly distinguished, we can get rid of the
-  ;; additional check to see if the repr is complex.
   (define real->precision (match mode
     ['bf (λ (repr x) (->bf x repr))]
     ['fl (λ (repr x) (->flonum x repr))]
@@ -99,23 +94,21 @@
     ['ival identity]
     ['nonffi identity]))
 
-  (define body*
-    (let inductor ([prog (program-body prog)])
-      (match prog
-        [(? value?) (real->precision repr prog)]
-        [(? constant?) (list (constant-info prog mode))]
-        [(? variable?) prog]
-        [(list op args ...)
-         (cons (operator-info op mode) (map inductor args))]
-        [_ (error (format "Invalid program ~a" prog))])))
-
-  (define fn
-    `(λ ,(program-variables prog)
-       (let (,@(for/list ([var (program-variables prog)])
-                 (define repr (dict-ref (*var-reprs*) var))
-                 `[,var (,(curry real->precision repr) ,var)]))
-         (,precision->real ,(compile body*)))))
-  (common-eval fn))
+  (λ pt
+    (define cache (hash-ref eval-cache pt make-hash))
+    (define env
+      (for/hash ([var (program-variables prog)] [val pt])
+        (values var (real->precision (dict-ref (*var-reprs*) var) val))))
+    (precision->real
+     (let loop ([expr (program-body prog)])
+       (hash-ref! cache expr
+                  (λ ()
+                    (match expr
+                      [(? real?) (real->precision repr expr)]
+                      [(? constant?) ((constant-info expr mode))]
+                      [(? variable?) (dict-ref env expr)]
+                      [(list op args ...)
+                       (apply (operator-info op mode) (map loop args))])))))))
 
 (define (eval-const-expr expr)
   ;; When we are in nonffi mode, we don't use repr, so pass in #f
@@ -161,31 +154,6 @@
       (define val (apply (eval-prog e 'bf (get-representation 'binary64)) p))
       (check bf<= (ival-lo iv) (ival-hi iv))
       (check-in-interval? iv val))))
-
-;; To compute the cost of a program, we could use the tree as a
-;; whole, but this is inaccurate if the program has many common
-;; subexpressions.  So, we compile the program to a register machine
-;; and use that to estimate the cost.
-
-(define (compile expr)
-  (define assignments '())
-  (define compilations (make-hash))
-
-  ;; TODO : use one of Racket's memoization libraries
-  (define (compile-one expr)
-    (hash-ref!
-     compilations expr
-     (λ ()
-       (let ([expr* (if (list? expr)
-			(let ([fn (car expr)] [children (cdr expr)])
-			  (cons fn (map compile-one children)))
-			expr)]
-	     [register (gensym "r")])
-	 (set! assignments (cons (list register expr*) assignments))
-	 register))))
-
-  (let ([reg (compile-one expr)])
-    `(let* ,(reverse assignments) ,reg)))
 
 (define/contract (replace-expression haystack needle needle*)
   (-> expr? expr? expr? expr?)
