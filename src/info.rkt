@@ -31,8 +31,7 @@
     "web-server-lib"
     ("egg-herbie-windows" #:platform "win32\\x86_64" #:version "1.4")
     ("egg-herbie-osx" #:platform "x86_64-macosx" #:version "1.4")
-    ("egg-herbie-linux" #:platform "x86_64-linux" #:version "1.4")
-    "regraph"))
+    ("egg-herbie-linux" #:platform "x86_64-linux" #:version "1.4")))
 
 (define build-deps
   '("rackunit-lib"))

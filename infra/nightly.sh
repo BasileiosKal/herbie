@@ -21,6 +21,13 @@ function run {
 }
 
 # install package deps
+git clone https://github.com/pavpanchekha/regraph
+cd regraph
+git checkout rebuilding
+raco pkg remove regraph
+raco pkg install --auto
+cd ..
+
 raco pkg install --auto ./src
 raco pkg update --auto ./src
 
