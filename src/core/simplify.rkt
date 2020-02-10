@@ -19,11 +19,7 @@
 
 ;; fall back on herbie-egraph if egg-herbie is unavailable
 (define use-egg-math?
-  (or
-   (hash-has-key? (installed-pkg-table) "egg-herbie")
-   (hash-has-key? (installed-pkg-table) "egg-herbie-windows")
-   (hash-has-key? (installed-pkg-table) "egg-herbie-osx")
-   (hash-has-key? (installed-pkg-table) "egg-herbie-linux")))
+  false)
 
 ;; prefab struct used to send rules to egg-herbie
 (struct irule (name input output) #:prefab)
