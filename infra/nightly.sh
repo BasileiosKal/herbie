@@ -23,8 +23,8 @@ function run {
 # install package deps
 git clone --branch rebuilding https://github.com/pavpanchekha/regraph
 cd regraph
-raco pkg remove regraph
 raco pkg install --auto
+raco pkg update --auto ./src
 cd ..
 
 raco pkg install --auto ./src
