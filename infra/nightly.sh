@@ -21,7 +21,8 @@ function run {
 }
 
 # install package deps
-git clone --branch duplicates-fixed https://github.com/pavpanchekha/regraph
+rm -rf ./regraph
+git clone --branch duplicates-fixed-2 https://github.com/pavpanchekha/regraph
 cd regraph
 git pull
 raco pkg install --auto
