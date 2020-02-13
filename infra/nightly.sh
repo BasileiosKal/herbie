@@ -21,7 +21,7 @@ function run {
 }
 
 # install package deps
-git clone --branch rebuilding https://github.com/pavpanchekha/regraph
+git clone --branch no-congruence-closure https://github.com/pavpanchekha/regraph
 cd regraph
 raco pkg install --auto
 raco pkg update --auto ./src
