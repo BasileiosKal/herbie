@@ -24,7 +24,7 @@ before_install:
   - git clone https://github.com/greghendershott/travis-racket.git ../travis-racket
   - cat ../travis-racket/install-racket.sh | bash
   - export PATH="${RACKET_DIR}/bin:${PATH}"
-  - git clone --branch rebuilding https://github.com/pavpanchekha/regraph
+  - git clone --branch duplicates-fixed https://github.com/pavpanchekha/regraph
   - cd regraph && raco pkg install --auto && cd ..
 install:
   - raco pkg install --no-cache --auto $TRAVIS_BUILD_DIR/src 
