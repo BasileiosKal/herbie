@@ -25,6 +25,8 @@
    (hash-has-key? (installed-pkg-table) "egg-herbie-osx")
    (hash-has-key? (installed-pkg-table) "egg-herbie-linux")))
 
+(define exprs-out (open-output-file "rules.txt" #:exists 'replace))
+
 ;; prefab struct used to send rules to egg-herbie
 (struct irule (name input output) #:prefab)
 
@@ -41,6 +43,10 @@
 
 (define/contract (simplify-batch exprs #:rules rls #:precompute [precompute? false])
   (->* (expr? #:rules (listof rule?)) (#:precompute boolean?) expr?)
+  (writeln "NEW BATCH" exprs-out)
+  (for ([e (map munge exprs)])
+    (writeln e exprs-out))
+  
 
   (define driver
     (cond
