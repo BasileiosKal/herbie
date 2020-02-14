@@ -21,11 +21,13 @@ function run {
 }
 
 # install package deps
+raco pkg remove regraph
 git clone --branch rebuilding https://github.com/pavpanchekha/regraph
 cd regraph
 git pull
 raco pkg install --auto
-raco pkg update --auto ./src
+raco pkg update --auto
+raco make -v main.rkt
 cd ..
 
 raco pkg install --auto ./src
