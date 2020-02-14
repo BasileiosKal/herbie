@@ -21,8 +21,8 @@ function run {
 }
 
 # install package deps
-raco pkg remove regraph
 rm -rf ./regraph
+raco pkg remove regraph
 git clone --branch duplicates-fixed-2 https://github.com/pavpanchekha/regraph
 cd regraph
 git pull
