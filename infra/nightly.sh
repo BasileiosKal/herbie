@@ -21,6 +21,8 @@ function run {
 }
 
 # install package deps
+raco pkg remove src
+raco pkg remove regraph
 raco pkg install --auto ./src
 raco pkg update --auto ./src
 
