@@ -27,6 +27,7 @@ rm -rf regraph
 git clone --branch rebuilding https://github.com/pavpanchekha/regraph
 cd regraph
 raco pkg install --auto
+raco make -v main.rkt
 cd ..
 
 raco pkg install --auto ./src
