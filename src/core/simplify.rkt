@@ -43,10 +43,14 @@
 
 (define/contract (simplify-batch exprs #:rules rls #:precompute [precompute? false])
   (->* (expr? #:rules (listof rule?)) (#:precompute boolean?) expr?)
-  (writeln "NEW BATCH" exprs-out)
-  (for ([e (map munge exprs)])
-    (writeln e exprs-out))
   
+  (if precompute?
+      (begin
+        (writeln "NEW BATCH" exprs-out)
+        (for ([e (map munge exprs)])
+          (writeln e exprs-out)))
+      (println "skip no precompute"))
+  (flush-output)
 
   (define driver
     (cond
